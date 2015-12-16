@@ -10,7 +10,7 @@ use Spryker\Zed\Kernel\Communication\AbstractCommunicationFactory;
 use Spryker\Zed\AvailabilityCartConnector\AvailabilityCartConnectorDependencyProvider;
 use Spryker\Zed\AvailabilityCartConnector\Dependency\Facade\AvailabilityToCartConnectorFacadeInterface as AvailabilityFacade;
 
-class AvailabilityCartConnectorDependencyContainer extends AbstractCommunicationFactory
+class AvailabilityCartConnectorCommunicationFactory extends AbstractCommunicationFactory
 {
 
     /**
