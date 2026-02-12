@@ -12,10 +12,5 @@ use Generated\Shared\Transfer\SellableItemsResponseTransfer;
 
 interface SellableItemsReaderInterface
 {
-    /**
-     * @param \Generated\Shared\Transfer\CartChangeTransfer $cartChangeTransfer
-     *
-     * @return \Generated\Shared\Transfer\SellableItemsResponseTransfer
-     */
-    public function getSellableItems(CartChangeTransfer $cartChangeTransfer): SellableItemsResponseTransfer;
+    public function getSellableItems(CartChangeTransfer $cartChangeTransfer, bool $skipItemsWithAmount = true): SellableItemsResponseTransfer;
 }

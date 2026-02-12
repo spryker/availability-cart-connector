@@ -66,6 +66,7 @@
         <property name="availableQuantity" type="decimal"/>
         <property name="sku" type="string"/>
         <property name="productAvailabilityCriteria" type="ProductAvailabilityCriteria" strict="true"/>
+        <property name="quantity" type="decimal"/>
     </transfer>
 
 </transfers>

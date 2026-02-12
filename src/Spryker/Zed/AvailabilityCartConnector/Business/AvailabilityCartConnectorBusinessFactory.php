@@ -13,6 +13,8 @@ use Spryker\Zed\AvailabilityCartConnector\Business\Calculator\ItemQuantityCalcul
 use Spryker\Zed\AvailabilityCartConnector\Business\Cart\CheckCartAvailability;
 use Spryker\Zed\AvailabilityCartConnector\Business\Creator\MessageCreator;
 use Spryker\Zed\AvailabilityCartConnector\Business\Creator\MessageCreatorInterface;
+use Spryker\Zed\AvailabilityCartConnector\Business\Expander\AvailabilityItemExpander;
+use Spryker\Zed\AvailabilityCartConnector\Business\Expander\AvailabilityItemExpanderInterface;
 use Spryker\Zed\AvailabilityCartConnector\Business\Filter\CartChangeItemFilter;
 use Spryker\Zed\AvailabilityCartConnector\Business\Filter\CartChangeItemFilterInterface;
 use Spryker\Zed\AvailabilityCartConnector\Business\Reader\SellableItemsReader;
@@ -72,6 +74,13 @@ class AvailabilityCartConnectorBusinessFactory extends AbstractBusinessFactory
     public function createMessageCreator(): MessageCreatorInterface
     {
         return new MessageCreator();
+    }
+
+    public function createAvailabilityItemExpander(): AvailabilityItemExpanderInterface
+    {
+        return new AvailabilityItemExpander(
+            $this->createSellableItemsReader(),
+        );
     }
 
     /**
