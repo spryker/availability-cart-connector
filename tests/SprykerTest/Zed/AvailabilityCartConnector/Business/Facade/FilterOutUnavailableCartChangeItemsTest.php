@@ -11,8 +11,10 @@ use Codeception\Test\Unit;
 use Generated\Shared\DataBuilder\CartChangeBuilder;
 use Generated\Shared\Transfer\ItemTransfer;
 use Generated\Shared\Transfer\QuoteTransfer;
+use ReflectionClass;
 use Spryker\Shared\Kernel\Transfer\Exception\RequiredTransferPropertyException;
 use Spryker\Zed\Availability\Communication\Plugin\Cart\ProductConcreteBatchAvailabilityStrategyPlugin;
+use Spryker\Zed\AvailabilityCartConnector\Business\Reader\SellableItemsReader;
 use SprykerTest\Zed\AvailabilityCartConnector\AvailabilityCartConnectorBusinessTester;
 
 /**
@@ -46,6 +48,8 @@ class FilterOutUnavailableCartChangeItemsTest extends Unit
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->clearStaticCache();
 
         $this->tester->setDependency(
             static::PLUGINS_BATCH_AVAILABILITY_STRATEGY,
@@ -180,5 +184,13 @@ class FilterOutUnavailableCartChangeItemsTest extends Unit
 
         // Act
         $this->tester->getFacade()->filterOutUnavailableCartChangeItems($cartChangeTransfer);
+    }
+
+    protected function clearStaticCache(): void
+    {
+        $reflection = new ReflectionClass(SellableItemsReader::class);
+        $property = $reflection->getProperty('sellableItemsCache');
+        $property->setAccessible(true);
+        $property->setValue(null, []);
     }
 }

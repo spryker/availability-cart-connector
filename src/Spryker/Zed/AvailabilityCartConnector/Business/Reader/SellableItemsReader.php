@@ -12,7 +12,6 @@ use Generated\Shared\Transfer\ProductAvailabilityCriteriaTransfer;
 use Generated\Shared\Transfer\SellableItemRequestTransfer;
 use Generated\Shared\Transfer\SellableItemsRequestTransfer;
 use Generated\Shared\Transfer\SellableItemsResponseTransfer;
-use Spryker\DecimalObject\Decimal;
 use Spryker\Zed\AvailabilityCartConnector\Business\Calculator\ItemQuantityCalculatorInterface;
 use Spryker\Zed\AvailabilityCartConnector\Dependency\Facade\AvailabilityCartConnectorToAvailabilityInterface;
 
@@ -91,27 +90,14 @@ class SellableItemsReader implements SellableItemsReaderInterface
         return $sellableItemsRequestTransfer;
     }
 
-    protected function generateCacheKey(string $sku, string $storeIdentifier, Decimal $quantity): string
-    {
-        return sprintf('%s-%s-%s', $sku, $storeIdentifier, $quantity->toString());
-    }
-
     protected function filterCachedRequests(SellableItemsRequestTransfer $sellableItemsRequestTransfer): SellableItemsRequestTransfer
     {
         $filteredSellableItemsRequestTransfer = (new SellableItemsRequestTransfer())
             ->setStore($sellableItemsRequestTransfer->getStoreOrFail())
             ->setQuote($sellableItemsRequestTransfer->getQuoteOrFail());
 
-        $storeIdentifier = $sellableItemsRequestTransfer->getStoreOrFail()->getNameOrFail();
-
         foreach ($sellableItemsRequestTransfer->getSellableItemRequests() as $sellableItemRequestTransfer) {
-            $cacheKey = $this->generateCacheKey(
-                $sellableItemRequestTransfer->getSkuOrFail(),
-                $storeIdentifier,
-                $sellableItemRequestTransfer->getQuantityOrFail(),
-            );
-
-            if (isset(static::$sellableItemsCache[$cacheKey])) {
+            if (isset(static::$sellableItemsCache[$sellableItemRequestTransfer->getProductAvailabilityCriteriaOrFail()->getEntityIdentifierOrFail()])) {
                 continue;
             }
 
@@ -126,30 +112,22 @@ class SellableItemsReader implements SellableItemsReaderInterface
         SellableItemsResponseTransfer $fetchedSellableItemsResponseTransfer
     ): SellableItemsResponseTransfer {
         $mergedSellableItemsResponseTransfer = new SellableItemsResponseTransfer();
-        $storeIdentifier = $sellableItemsRequestTransfer->getStoreOrFail()->getNameOrFail();
-
         $sellableItemResponsesIndexedByEntityIdentifier = $this->getSellableItemResponsesIndexedByEntityIdentifier(
             $fetchedSellableItemsResponseTransfer,
         );
 
         foreach ($sellableItemsRequestTransfer->getSellableItemRequests() as $sellableItemRequestTransfer) {
-            $cacheKey = $this->generateCacheKey(
-                $sellableItemRequestTransfer->getSkuOrFail(),
-                $storeIdentifier,
-                $sellableItemRequestTransfer->getQuantityOrFail(),
-            );
+            $entityIdentifier = $sellableItemRequestTransfer->getProductAvailabilityCriteriaOrFail()->getEntityIdentifierOrFail();
 
-            if (isset(static::$sellableItemsCache[$cacheKey])) {
-                $mergedSellableItemsResponseTransfer->addSellableItemResponse(static::$sellableItemsCache[$cacheKey]);
+            if (isset(static::$sellableItemsCache[$entityIdentifier])) {
+                $mergedSellableItemsResponseTransfer->addSellableItemResponse(static::$sellableItemsCache[$entityIdentifier]);
 
                 continue;
             }
 
-            $entityIdentifier = $sellableItemRequestTransfer->getProductAvailabilityCriteriaOrFail()->getEntityIdentifierOrFail();
-
             if (isset($sellableItemResponsesIndexedByEntityIdentifier[$entityIdentifier])) {
                 $sellableItemResponseTransfer = $sellableItemResponsesIndexedByEntityIdentifier[$entityIdentifier];
-                static::$sellableItemsCache[$cacheKey] = $sellableItemResponseTransfer;
+                static::$sellableItemsCache[$entityIdentifier] = $sellableItemResponseTransfer;
                 $mergedSellableItemsResponseTransfer->addSellableItemResponse($sellableItemResponseTransfer);
             }
         }

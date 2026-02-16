@@ -8,7 +8,9 @@
 namespace SprykerTest\Zed\AvailabilityCartConnector\Communication\Plugin\Cart;
 
 use Codeception\Test\Unit;
+use ReflectionClass;
 use Spryker\Zed\Availability\Communication\Plugin\Cart\ProductConcreteBatchAvailabilityStrategyPlugin;
+use Spryker\Zed\AvailabilityCartConnector\Business\Reader\SellableItemsReader;
 use Spryker\Zed\AvailabilityCartConnector\Communication\Plugin\Cart\AvailabilityItemExpanderPlugin;
 use SprykerTest\Zed\AvailabilityCartConnector\AvailabilityCartConnectorCommunicationTester;
 
@@ -32,6 +34,13 @@ class AvailabilityItemExpanderPluginTest extends Unit
     protected const string PLUGINS_BATCH_AVAILABILITY_STRATEGY = 'PLUGINS_BATCH_AVAILABILITY_STRATEGY';
 
     protected AvailabilityCartConnectorCommunicationTester $tester;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->clearStaticCache();
+    }
 
     /**
      * @dataProvider expandItemsDataProvider
@@ -101,5 +110,13 @@ class AvailabilityItemExpanderPluginTest extends Unit
                 ],
             ],
         ];
+    }
+
+    protected function clearStaticCache(): void
+    {
+        $reflection = new ReflectionClass(SellableItemsReader::class);
+        $property = $reflection->getProperty('sellableItemsCache');
+        $property->setAccessible(true);
+        $property->setValue(null, []);
     }
 }

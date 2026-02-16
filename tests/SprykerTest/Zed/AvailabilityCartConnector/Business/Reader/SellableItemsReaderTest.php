@@ -205,6 +205,131 @@ class SellableItemsReaderTest extends Unit
                     ['availableQuantity' => 20.0, 'isNeverOutOfStock' => false],
                 ],
             ],
+            'same sku and quantity with different entity identifiers - all cached' => [
+                'cartItems' => [
+                    ['entityIdentifier' => static::ENTITY_IDENTIFIER_1, 'sku' => static::SKU_1, 'quantity' => 5],
+                    ['entityIdentifier' => static::ENTITY_IDENTIFIER_2, 'sku' => static::SKU_1, 'quantity' => 5],
+                    ['entityIdentifier' => static::ENTITY_IDENTIFIER_3, 'sku' => static::SKU_1, 'quantity' => 5],
+                ],
+                'cachedItems' => [
+                    static::SKU_1 => ['entityIdentifier' => static::ENTITY_IDENTIFIER_1, 'quantity' => 5, 'availableQuantity' => 100.0, 'isNeverOutOfStock' => false],
+                    static::SKU_2 => ['entityIdentifier' => static::ENTITY_IDENTIFIER_2, 'quantity' => 5, 'availableQuantity' => 95.0, 'isNeverOutOfStock' => false],
+                    static::SKU_3 => ['entityIdentifier' => static::ENTITY_IDENTIFIER_3, 'quantity' => 5, 'availableQuantity' => 90.0, 'isNeverOutOfStock' => false],
+                ],
+                'facadeResponse' => [],
+                'shouldCallFacade' => false,
+                'skipItemsWithAmount' => false,
+                'expectedItemsData' => [
+                    ['availableQuantity' => 100.0, 'isNeverOutOfStock' => false],
+                    ['availableQuantity' => 95.0, 'isNeverOutOfStock' => false],
+                    ['availableQuantity' => 90.0, 'isNeverOutOfStock' => false],
+                ],
+            ],
+            'same sku and quantity with different entity identifiers - none cached' => [
+                'cartItems' => [
+                    ['entityIdentifier' => static::ENTITY_IDENTIFIER_1, 'sku' => static::SKU_1, 'quantity' => 10],
+                    ['entityIdentifier' => static::ENTITY_IDENTIFIER_2, 'sku' => static::SKU_1, 'quantity' => 10],
+                    ['entityIdentifier' => static::ENTITY_IDENTIFIER_3, 'sku' => static::SKU_1, 'quantity' => 10],
+                ],
+                'cachedItems' => [],
+                'facadeResponse' => [
+                    static::SKU_1 => ['entityIdentifier' => static::ENTITY_IDENTIFIER_1, 'availableQuantity' => 100.0, 'isNeverOutOfStock' => false],
+                ],
+                'shouldCallFacade' => true,
+                'skipItemsWithAmount' => false,
+                'expectedItemsData' => [
+                    ['availableQuantity' => 100.0, 'isNeverOutOfStock' => false],
+                    ['availableQuantity' => 100.0, 'isNeverOutOfStock' => false],
+                    ['availableQuantity' => 100.0, 'isNeverOutOfStock' => false],
+                ],
+            ],
+            'same sku and quantity with different entity identifiers - mixed cached and uncached' => [
+                'cartItems' => [
+                    ['entityIdentifier' => static::ENTITY_IDENTIFIER_1, 'sku' => static::SKU_1, 'quantity' => 3],
+                    ['entityIdentifier' => static::ENTITY_IDENTIFIER_2, 'sku' => static::SKU_1, 'quantity' => 3],
+                    ['entityIdentifier' => static::ENTITY_IDENTIFIER_3, 'sku' => static::SKU_1, 'quantity' => 3],
+                ],
+                'cachedItems' => [
+                    static::SKU_1 => ['entityIdentifier' => static::ENTITY_IDENTIFIER_1, 'quantity' => 3, 'availableQuantity' => 100.0, 'isNeverOutOfStock' => false],
+                ],
+                'facadeResponse' => [
+                    static::SKU_1 => ['entityIdentifier' => static::ENTITY_IDENTIFIER_2, 'availableQuantity' => 97.0, 'isNeverOutOfStock' => false],
+                ],
+                'shouldCallFacade' => true,
+                'skipItemsWithAmount' => false,
+                'expectedItemsData' => [
+                    ['availableQuantity' => 100.0, 'isNeverOutOfStock' => false],
+                    ['availableQuantity' => 97.0, 'isNeverOutOfStock' => false],
+                    ['availableQuantity' => 97.0, 'isNeverOutOfStock' => false],
+                ],
+            ],
+            'numeric entity identifiers - same sku and quantity - all cached' => [
+                'cartItems' => [
+                    ['entityIdentifier' => 0, 'sku' => static::SKU_1, 'quantity' => 2],
+                    ['entityIdentifier' => 1, 'sku' => static::SKU_1, 'quantity' => 2],
+                    ['entityIdentifier' => 2, 'sku' => static::SKU_1, 'quantity' => 2],
+                ],
+                'cachedItems' => [
+                    static::SKU_1 => ['entityIdentifier' => 0, 'quantity' => 2, 'availableQuantity' => 50.0, 'isNeverOutOfStock' => false],
+                    static::SKU_2 => ['entityIdentifier' => 1, 'quantity' => 2, 'availableQuantity' => 48.0, 'isNeverOutOfStock' => false],
+                    static::SKU_3 => ['entityIdentifier' => 2, 'quantity' => 2, 'availableQuantity' => 46.0, 'isNeverOutOfStock' => false],
+                ],
+                'facadeResponse' => [],
+                'shouldCallFacade' => false,
+                'skipItemsWithAmount' => false,
+                'expectedItemsData' => [
+                    ['availableQuantity' => 50.0, 'isNeverOutOfStock' => false],
+                    ['availableQuantity' => 48.0, 'isNeverOutOfStock' => false],
+                    ['availableQuantity' => 46.0, 'isNeverOutOfStock' => false],
+                ],
+            ],
+            'numeric entity identifiers - same sku and quantity - mixed' => [
+                'cartItems' => [
+                    ['entityIdentifier' => 0, 'sku' => static::SKU_1, 'quantity' => 7],
+                    ['entityIdentifier' => 1, 'sku' => static::SKU_1, 'quantity' => 7],
+                    ['entityIdentifier' => 2, 'sku' => static::SKU_1, 'quantity' => 7],
+                    ['entityIdentifier' => 3, 'sku' => static::SKU_1, 'quantity' => 7],
+                ],
+                'cachedItems' => [
+                    static::SKU_1 => ['entityIdentifier' => 0, 'quantity' => 7, 'availableQuantity' => 100.0, 'isNeverOutOfStock' => false],
+                    static::SKU_2 => ['entityIdentifier' => 2, 'quantity' => 7, 'availableQuantity' => 86.0, 'isNeverOutOfStock' => true],
+                ],
+                'facadeResponse' => [
+                    static::SKU_1 => ['entityIdentifier' => 1, 'availableQuantity' => 93.0, 'isNeverOutOfStock' => false],
+                ],
+                'shouldCallFacade' => true,
+                'skipItemsWithAmount' => false,
+                'expectedItemsData' => [
+                    ['availableQuantity' => 100.0, 'isNeverOutOfStock' => false],
+                    ['availableQuantity' => 93.0, 'isNeverOutOfStock' => false],
+                    ['availableQuantity' => 86.0, 'isNeverOutOfStock' => true],
+                    ['availableQuantity' => 93.0, 'isNeverOutOfStock' => false],
+                ],
+            ],
+            'numeric entity identifiers - mixed skus and quantities' => [
+                'cartItems' => [
+                    ['entityIdentifier' => 0, 'sku' => static::SKU_1, 'quantity' => 5],
+                    ['entityIdentifier' => 1, 'sku' => static::SKU_2, 'quantity' => 3],
+                    ['entityIdentifier' => 2, 'sku' => static::SKU_1, 'quantity' => 5],
+                    ['entityIdentifier' => 3, 'sku' => static::SKU_3, 'quantity' => 1],
+                ],
+                'cachedItems' => [
+                    static::SKU_1 => ['entityIdentifier' => 0, 'quantity' => 5, 'availableQuantity' => 80.0, 'isNeverOutOfStock' => false],
+                ],
+                'facadeResponse' => [
+                    static::SKU_1 => ['entityIdentifier' => 2, 'availableQuantity' => 75.0, 'isNeverOutOfStock' => false],
+                    static::SKU_2 => ['entityIdentifier' => 1, 'availableQuantity' => 30.0, 'isNeverOutOfStock' => true],
+                    static::SKU_3 => ['entityIdentifier' => 3, 'availableQuantity' => 10.0, 'isNeverOutOfStock' => false],
+                ],
+                'shouldCallFacade' => true,
+                'skipItemsWithAmount' => false,
+                'expectedItemsData' => [
+                    ['availableQuantity' => 80.0, 'isNeverOutOfStock' => false],
+                    ['availableQuantity' => 30.0, 'isNeverOutOfStock' => true],
+                    ['availableQuantity' => 75.0, 'isNeverOutOfStock' => false],
+                    ['availableQuantity' => 10.0, 'isNeverOutOfStock' => false],
+                ],
+            ],
         ];
     }
 
@@ -275,9 +400,6 @@ class SellableItemsReaderTest extends Unit
         $cache = [];
 
         foreach ($cachedItems as $sku => $data) {
-            $quantity = new Decimal($data['quantity']);
-            $cacheKey = sprintf('%s-%s-%s', $sku, static::STORE_NAME, $quantity->toString());
-
             $productAvailabilityCriteriaTransfer = (new ProductAvailabilityCriteriaTransfer())
                 ->setEntityIdentifier($data['entityIdentifier']);
 
@@ -287,7 +409,7 @@ class SellableItemsReaderTest extends Unit
                 ->setIsNeverOutOfStock($data['isNeverOutOfStock'])
                 ->setProductAvailabilityCriteria($productAvailabilityCriteriaTransfer);
 
-            $cache[$cacheKey] = $sellableItemResponseTransfer;
+            $cache[$data['entityIdentifier']] = $sellableItemResponseTransfer;
         }
 
         return $cache;
