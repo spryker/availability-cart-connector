@@ -22,6 +22,9 @@ use Spryker\Zed\AvailabilityCartConnector\Business\Reader\SellableItemsReaderInt
 use Spryker\Zed\AvailabilityCartConnector\Dependency\Facade\AvailabilityCartConnectorToMessengerFacadeInterface;
 use Spryker\Zed\Kernel\Business\AbstractBusinessFactory;
 
+/**
+ * @method \Spryker\Zed\AvailabilityCartConnector\AvailabilityCartConnectorConfig getConfig()
+ */
 class AvailabilityCartConnectorBusinessFactory extends AbstractBusinessFactory
 {
     /**
@@ -57,6 +60,7 @@ class AvailabilityCartConnectorBusinessFactory extends AbstractBusinessFactory
         return new SellableItemsReader(
             $this->createItemQuantityCalculator(),
             $this->getAvailabilityFacade(),
+            $this->getConfig(),
         );
     }
 

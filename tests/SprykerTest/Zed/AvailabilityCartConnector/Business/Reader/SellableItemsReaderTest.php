@@ -9,12 +9,14 @@ namespace SprykerTest\Zed\AvailabilityCartConnector\Business\Reader;
 
 use Codeception\Test\Unit;
 use Generated\Shared\Transfer\ProductAvailabilityCriteriaTransfer;
+use Generated\Shared\Transfer\SellableItemRequestTransfer;
 use Generated\Shared\Transfer\SellableItemResponseTransfer;
 use Generated\Shared\Transfer\SellableItemsRequestTransfer;
 use Generated\Shared\Transfer\SellableItemsResponseTransfer;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use Spryker\DecimalObject\Decimal;
+use Spryker\Zed\AvailabilityCartConnector\AvailabilityCartConnectorConfig;
 use Spryker\Zed\AvailabilityCartConnector\Business\Calculator\ItemQuantityCalculatorInterface;
 use Spryker\Zed\AvailabilityCartConnector\Business\Reader\SellableItemsReader;
 use Spryker\Zed\AvailabilityCartConnector\Dependency\Facade\AvailabilityCartConnectorToAvailabilityInterface;
@@ -58,6 +60,7 @@ class SellableItemsReaderTest extends Unit
      * @param bool $shouldCallFacade
      * @param bool $skipItemsWithAmount
      * @param array<int, array<string, mixed>> $expectedItemsData
+     * @param bool $cacheEnabled
      *
      * @return void
      */
@@ -67,12 +70,18 @@ class SellableItemsReaderTest extends Unit
         array $facadeResponse,
         bool $shouldCallFacade,
         bool $skipItemsWithAmount,
-        array $expectedItemsData
+        array $expectedItemsData,
+        bool $cacheEnabled = true
     ): void {
         $this->clearStaticCache();
 
         // Arrange
-        $sellableItemsReader = $this->createSellableItemsReaderWithMocksAndCache($cachedItems, $facadeResponse, $shouldCallFacade);
+        $sellableItemsReader = $this->createSellableItemsReaderWithMocksAndCache(
+            $cachedItems,
+            $facadeResponse,
+            $shouldCallFacade,
+            $cacheEnabled,
+        );
         $cartChangeTransfer = $this->tester->createCartChangeTransfer(static::STORE_NAME, $cartItems);
 
         // Act
@@ -95,9 +104,9 @@ class SellableItemsReaderTest extends Unit
                     ['entityIdentifier' => static::ENTITY_IDENTIFIER_3, 'sku' => static::SKU_3, 'quantity' => 3],
                 ],
                 'cachedItems' => [
-                    static::SKU_1 => ['entityIdentifier' => static::ENTITY_IDENTIFIER_1, 'quantity' => 5, 'availableQuantity' => 100.0, 'isNeverOutOfStock' => false],
-                    static::SKU_2 => ['entityIdentifier' => static::ENTITY_IDENTIFIER_2, 'quantity' => 10, 'availableQuantity' => 50.0, 'isNeverOutOfStock' => true],
-                    static::SKU_3 => ['entityIdentifier' => static::ENTITY_IDENTIFIER_3, 'quantity' => 3, 'availableQuantity' => 20.0, 'isNeverOutOfStock' => false],
+                    ['sku' => static::SKU_1, 'entityIdentifier' => static::ENTITY_IDENTIFIER_1, 'quantity' => 5, 'availableQuantity' => 100.0, 'isNeverOutOfStock' => false],
+                    ['sku' => static::SKU_2, 'entityIdentifier' => static::ENTITY_IDENTIFIER_2, 'quantity' => 10, 'availableQuantity' => 50.0, 'isNeverOutOfStock' => true],
+                    ['sku' => static::SKU_3, 'entityIdentifier' => static::ENTITY_IDENTIFIER_3, 'quantity' => 3, 'availableQuantity' => 20.0, 'isNeverOutOfStock' => false],
                 ],
                 'facadeResponse' => [],
                 'shouldCallFacade' => false,
@@ -135,7 +144,7 @@ class SellableItemsReaderTest extends Unit
                     ['entityIdentifier' => static::ENTITY_IDENTIFIER_3, 'sku' => static::SKU_3, 'quantity' => 12],
                 ],
                 'cachedItems' => [
-                    static::SKU_1 => ['entityIdentifier' => static::ENTITY_IDENTIFIER_1, 'quantity' => 7, 'availableQuantity' => 60.0, 'isNeverOutOfStock' => true],
+                    ['sku' => static::SKU_1, 'entityIdentifier' => static::ENTITY_IDENTIFIER_1, 'quantity' => 7, 'availableQuantity' => 60.0, 'isNeverOutOfStock' => true],
                 ],
                 'facadeResponse' => [
                     static::SKU_2 => ['entityIdentifier' => static::ENTITY_IDENTIFIER_2, 'availableQuantity' => 8.0, 'isNeverOutOfStock' => false],
@@ -212,9 +221,9 @@ class SellableItemsReaderTest extends Unit
                     ['entityIdentifier' => static::ENTITY_IDENTIFIER_3, 'sku' => static::SKU_1, 'quantity' => 5],
                 ],
                 'cachedItems' => [
-                    static::SKU_1 => ['entityIdentifier' => static::ENTITY_IDENTIFIER_1, 'quantity' => 5, 'availableQuantity' => 100.0, 'isNeverOutOfStock' => false],
-                    static::SKU_2 => ['entityIdentifier' => static::ENTITY_IDENTIFIER_2, 'quantity' => 5, 'availableQuantity' => 95.0, 'isNeverOutOfStock' => false],
-                    static::SKU_3 => ['entityIdentifier' => static::ENTITY_IDENTIFIER_3, 'quantity' => 5, 'availableQuantity' => 90.0, 'isNeverOutOfStock' => false],
+                    ['sku' => static::SKU_1, 'entityIdentifier' => static::ENTITY_IDENTIFIER_1, 'quantity' => 5, 'availableQuantity' => 100.0, 'isNeverOutOfStock' => false],
+                    ['sku' => static::SKU_1, 'entityIdentifier' => static::ENTITY_IDENTIFIER_2, 'quantity' => 5, 'availableQuantity' => 95.0, 'isNeverOutOfStock' => false],
+                    ['sku' => static::SKU_1, 'entityIdentifier' => static::ENTITY_IDENTIFIER_3, 'quantity' => 5, 'availableQuantity' => 90.0, 'isNeverOutOfStock' => false],
                 ],
                 'facadeResponse' => [],
                 'shouldCallFacade' => false,
@@ -250,7 +259,7 @@ class SellableItemsReaderTest extends Unit
                     ['entityIdentifier' => static::ENTITY_IDENTIFIER_3, 'sku' => static::SKU_1, 'quantity' => 3],
                 ],
                 'cachedItems' => [
-                    static::SKU_1 => ['entityIdentifier' => static::ENTITY_IDENTIFIER_1, 'quantity' => 3, 'availableQuantity' => 100.0, 'isNeverOutOfStock' => false],
+                    ['sku' => static::SKU_1, 'entityIdentifier' => static::ENTITY_IDENTIFIER_1, 'quantity' => 3, 'availableQuantity' => 100.0, 'isNeverOutOfStock' => false],
                 ],
                 'facadeResponse' => [
                     static::SKU_1 => ['entityIdentifier' => static::ENTITY_IDENTIFIER_2, 'availableQuantity' => 97.0, 'isNeverOutOfStock' => false],
@@ -270,9 +279,9 @@ class SellableItemsReaderTest extends Unit
                     ['entityIdentifier' => 2, 'sku' => static::SKU_1, 'quantity' => 2],
                 ],
                 'cachedItems' => [
-                    static::SKU_1 => ['entityIdentifier' => 0, 'quantity' => 2, 'availableQuantity' => 50.0, 'isNeverOutOfStock' => false],
-                    static::SKU_2 => ['entityIdentifier' => 1, 'quantity' => 2, 'availableQuantity' => 48.0, 'isNeverOutOfStock' => false],
-                    static::SKU_3 => ['entityIdentifier' => 2, 'quantity' => 2, 'availableQuantity' => 46.0, 'isNeverOutOfStock' => false],
+                    ['sku' => static::SKU_1, 'entityIdentifier' => 0, 'quantity' => 2, 'availableQuantity' => 50.0, 'isNeverOutOfStock' => false],
+                    ['sku' => static::SKU_1, 'entityIdentifier' => 1, 'quantity' => 2, 'availableQuantity' => 48.0, 'isNeverOutOfStock' => false],
+                    ['sku' => static::SKU_1, 'entityIdentifier' => 2, 'quantity' => 2, 'availableQuantity' => 46.0, 'isNeverOutOfStock' => false],
                 ],
                 'facadeResponse' => [],
                 'shouldCallFacade' => false,
@@ -291,8 +300,8 @@ class SellableItemsReaderTest extends Unit
                     ['entityIdentifier' => 3, 'sku' => static::SKU_1, 'quantity' => 7],
                 ],
                 'cachedItems' => [
-                    static::SKU_1 => ['entityIdentifier' => 0, 'quantity' => 7, 'availableQuantity' => 100.0, 'isNeverOutOfStock' => false],
-                    static::SKU_2 => ['entityIdentifier' => 2, 'quantity' => 7, 'availableQuantity' => 86.0, 'isNeverOutOfStock' => true],
+                    ['sku' => static::SKU_1, 'entityIdentifier' => 0, 'quantity' => 7, 'availableQuantity' => 100.0, 'isNeverOutOfStock' => false],
+                    ['sku' => static::SKU_1, 'entityIdentifier' => 2, 'quantity' => 7, 'availableQuantity' => 86.0, 'isNeverOutOfStock' => true],
                 ],
                 'facadeResponse' => [
                     static::SKU_1 => ['entityIdentifier' => 1, 'availableQuantity' => 93.0, 'isNeverOutOfStock' => false],
@@ -314,7 +323,7 @@ class SellableItemsReaderTest extends Unit
                     ['entityIdentifier' => 3, 'sku' => static::SKU_3, 'quantity' => 1],
                 ],
                 'cachedItems' => [
-                    static::SKU_1 => ['entityIdentifier' => 0, 'quantity' => 5, 'availableQuantity' => 80.0, 'isNeverOutOfStock' => false],
+                    ['sku' => static::SKU_1, 'entityIdentifier' => 0, 'quantity' => 5, 'availableQuantity' => 80.0, 'isNeverOutOfStock' => false],
                 ],
                 'facadeResponse' => [
                     static::SKU_1 => ['entityIdentifier' => 2, 'availableQuantity' => 75.0, 'isNeverOutOfStock' => false],
@@ -330,46 +339,147 @@ class SellableItemsReaderTest extends Unit
                     ['availableQuantity' => 10.0, 'isNeverOutOfStock' => false],
                 ],
             ],
+            'cache disabled - facade always called with all items' => [
+                'cartItems' => [
+                    ['entityIdentifier' => static::ENTITY_IDENTIFIER_1, 'sku' => static::SKU_1, 'quantity' => 5],
+                    ['entityIdentifier' => static::ENTITY_IDENTIFIER_2, 'sku' => static::SKU_2, 'quantity' => 10],
+                    ['entityIdentifier' => static::ENTITY_IDENTIFIER_3, 'sku' => static::SKU_3, 'quantity' => 3],
+                ],
+                'cachedItems' => [],
+                'facadeResponse' => [
+                    static::SKU_1 => ['entityIdentifier' => static::ENTITY_IDENTIFIER_1, 'availableQuantity' => 100.0, 'isNeverOutOfStock' => false],
+                    static::SKU_2 => ['entityIdentifier' => static::ENTITY_IDENTIFIER_2, 'availableQuantity' => 50.0, 'isNeverOutOfStock' => true],
+                    static::SKU_3 => ['entityIdentifier' => static::ENTITY_IDENTIFIER_3, 'availableQuantity' => 20.0, 'isNeverOutOfStock' => false],
+                ],
+                'shouldCallFacade' => true,
+                'skipItemsWithAmount' => false,
+                'expectedItemsData' => [
+                    ['availableQuantity' => 100.0, 'isNeverOutOfStock' => false],
+                    ['availableQuantity' => 50.0, 'isNeverOutOfStock' => true],
+                    ['availableQuantity' => 20.0, 'isNeverOutOfStock' => false],
+                ],
+                'cacheEnabled' => false,
+            ],
+            'cache disabled - cached items ignored and facade called' => [
+                'cartItems' => [
+                    ['entityIdentifier' => static::ENTITY_IDENTIFIER_1, 'sku' => static::SKU_1, 'quantity' => 7],
+                    ['entityIdentifier' => static::ENTITY_IDENTIFIER_2, 'sku' => static::SKU_2, 'quantity' => 3],
+                ],
+                'cachedItems' => [
+                    ['sku' => static::SKU_1, 'entityIdentifier' => static::ENTITY_IDENTIFIER_1, 'quantity' => 7, 'availableQuantity' => 999.0, 'isNeverOutOfStock' => true],
+                ],
+                'facadeResponse' => [
+                    static::SKU_1 => ['entityIdentifier' => static::ENTITY_IDENTIFIER_1, 'availableQuantity' => 60.0, 'isNeverOutOfStock' => false],
+                    static::SKU_2 => ['entityIdentifier' => static::ENTITY_IDENTIFIER_2, 'availableQuantity' => 8.0, 'isNeverOutOfStock' => false],
+                ],
+                'shouldCallFacade' => true,
+                'skipItemsWithAmount' => false,
+                'expectedItemsData' => [
+                    ['availableQuantity' => 60.0, 'isNeverOutOfStock' => false],
+                    ['availableQuantity' => 8.0, 'isNeverOutOfStock' => false],
+                ],
+                'cacheEnabled' => false,
+            ],
         ];
+    }
+
+    public function testGetSellableItemsWithDifferentProductOfferReferences(): void
+    {
+        $this->clearStaticCache();
+
+        // Arrange
+        $storeName = static::STORE_NAME;
+        $availabilityFacadeMock = $this->createMock(AvailabilityCartConnectorToAvailabilityInterface::class);
+
+        $availabilityFacadeMock
+            ->expects($this->exactly(2))
+            ->method('areProductsSellableForStore')
+            ->willReturnOnConsecutiveCalls(
+                (new SellableItemsResponseTransfer())->addSellableItemResponse(
+                    (new SellableItemResponseTransfer())
+                        ->setSku(static::SKU_1)
+                        ->setAvailableQuantity(new Decimal(100.0))
+                        ->setIsNeverOutOfStock(false)
+                        ->setProductAvailabilityCriteria((new ProductAvailabilityCriteriaTransfer())->setEntityIdentifier(static::ENTITY_IDENTIFIER_1)),
+                ),
+                (new SellableItemsResponseTransfer())->addSellableItemResponse(
+                    (new SellableItemResponseTransfer())
+                        ->setSku(static::SKU_1)
+                        ->setAvailableQuantity(new Decimal(75.0))
+                        ->setIsNeverOutOfStock(true)
+                        ->setProductAvailabilityCriteria((new ProductAvailabilityCriteriaTransfer())->setEntityIdentifier(static::ENTITY_IDENTIFIER_2)),
+                ),
+            );
+
+        $sellableItemsReader = $this->createSellableItemsReader($availabilityFacadeMock, []);
+
+        // Act - First call with offer reference 1
+        $cartItems1 = [
+            ['entityIdentifier' => static::ENTITY_IDENTIFIER_1, 'sku' => static::SKU_1, 'quantity' => 5, 'productOfferReference' => 'offer-1'],
+        ];
+        $cartChangeTransfer1 = $this->tester->createCartChangeTransfer($storeName, $cartItems1);
+        $result1 = $sellableItemsReader->getSellableItems($cartChangeTransfer1, false);
+
+        // Assert - First call returns correct data
+        $this->assertCount(1, $result1->getSellableItemResponses());
+        $this->assertSame(100.0, $result1->getSellableItemResponses()->offsetGet(0)->getAvailableQuantity()->toFloat());
+
+        // Act - Second call with same SKU and quantity but different offer reference
+        $cartItems2 = [
+            ['entityIdentifier' => static::ENTITY_IDENTIFIER_2, 'sku' => static::SKU_1, 'quantity' => 5, 'productOfferReference' => 'offer-2'],
+        ];
+        $cartChangeTransfer2 = $this->tester->createCartChangeTransfer($storeName, $cartItems2);
+        $result2 = $sellableItemsReader->getSellableItems($cartChangeTransfer2, false);
+
+        // Assert - Second call returns different data (facade called twice, cache keys are different due to different offer references)
+        $this->assertCount(1, $result2->getSellableItemResponses());
+        $this->assertSame(75.0, $result2->getSellableItemResponses()->offsetGet(0)->getAvailableQuantity()->toFloat());
     }
 
     /**
      * @param array<string, array<string, mixed>> $cachedItems
      * @param array<string, array<string, mixed>> $facadeResponse
      * @param bool $shouldCallFacade
+     * @param bool $cacheEnabled
      *
      * @return \Spryker\Zed\AvailabilityCartConnector\Business\Reader\SellableItemsReader
      */
     protected function createSellableItemsReaderWithMocksAndCache(
         array $cachedItems,
         array $facadeResponse,
-        bool $shouldCallFacade
+        bool $shouldCallFacade,
+        bool $cacheEnabled = true
     ): SellableItemsReader {
         $availabilityFacadeMock = $this->createAvailabilityFacadeMock($facadeResponse, $shouldCallFacade);
 
-        return $this->createSellableItemsReader($availabilityFacadeMock, $cachedItems);
+        return $this->createSellableItemsReader($availabilityFacadeMock, $cachedItems, $cacheEnabled);
     }
 
     /**
      * @param \PHPUnit\Framework\MockObject\MockObject $availabilityFacadeMock
      * @param array<string, array<string, mixed>> $cachedItems
+     * @param bool $cacheEnabled
      *
      * @return \Spryker\Zed\AvailabilityCartConnector\Business\Reader\SellableItemsReader
      */
     protected function createSellableItemsReader(
         MockObject $availabilityFacadeMock,
-        array $cachedItems
+        array $cachedItems,
+        bool $cacheEnabled = true
     ): SellableItemsReader {
+        $configMock = $this->createConfigMock($cacheEnabled);
+
         $sellableItemsReader = new SellableItemsReader(
             $this->createItemQuantityCalculatorMock(),
             $availabilityFacadeMock,
+            $configMock,
         );
 
         if (count($cachedItems) === 0) {
             return $sellableItemsReader;
         }
 
-        $this->setCacheItems($sellableItemsReader, $cachedItems);
+        $this->setCacheItems($sellableItemsReader, $cachedItems, $configMock);
 
         return $sellableItemsReader;
     }
@@ -377,12 +487,16 @@ class SellableItemsReaderTest extends Unit
     /**
      * @param \Spryker\Zed\AvailabilityCartConnector\Business\Reader\SellableItemsReader $sellableItemsReader
      * @param array<string, array<string, mixed>> $cachedItems
+     * @param \Spryker\Zed\AvailabilityCartConnector\AvailabilityCartConnectorConfig $config
      *
      * @return void
      */
-    protected function setCacheItems(SellableItemsReader $sellableItemsReader, array $cachedItems): void
-    {
-        $cache = $this->buildCacheFromItems($cachedItems);
+    protected function setCacheItems(
+        SellableItemsReader $sellableItemsReader,
+        array $cachedItems,
+        AvailabilityCartConnectorConfig $config
+    ): void {
+        $cache = $this->buildCacheFromItems($cachedItems, $config);
 
         $reflection = new ReflectionClass(SellableItemsReader::class);
         $property = $reflection->getProperty('sellableItemsCache');
@@ -392,24 +506,35 @@ class SellableItemsReaderTest extends Unit
 
     /**
      * @param array<string, array<string, mixed>> $cachedItems
+     * @param \Spryker\Zed\AvailabilityCartConnector\AvailabilityCartConnectorConfig $config
      *
      * @return array<string, \Generated\Shared\Transfer\SellableItemResponseTransfer>
      */
-    protected function buildCacheFromItems(array $cachedItems): array
+    protected function buildCacheFromItems(array $cachedItems, AvailabilityCartConnectorConfig $config): array
     {
         $cache = [];
 
-        foreach ($cachedItems as $sku => $data) {
+        foreach ($cachedItems as $data) {
             $productAvailabilityCriteriaTransfer = (new ProductAvailabilityCriteriaTransfer())
                 ->setEntityIdentifier($data['entityIdentifier']);
 
+            if (isset($data['productOfferReference'])) {
+                $productAvailabilityCriteriaTransfer->setProductOfferReference($data['productOfferReference']);
+            }
+
+            $sellableItemRequestTransfer = (new SellableItemRequestTransfer())
+                ->setSku($data['sku'])
+                ->setQuantity(isset($data['quantity']) ? new Decimal($data['quantity']) : new Decimal(0))
+                ->setProductAvailabilityCriteria($productAvailabilityCriteriaTransfer);
+
             $sellableItemResponseTransfer = (new SellableItemResponseTransfer())
-                ->setSku($sku)
+                ->setSku($data['sku'])
                 ->setAvailableQuantity(new Decimal($data['availableQuantity']))
                 ->setIsNeverOutOfStock($data['isNeverOutOfStock'])
                 ->setProductAvailabilityCriteria($productAvailabilityCriteriaTransfer);
 
-            $cache[$data['entityIdentifier']] = $sellableItemResponseTransfer;
+            $cacheKey = $config->generateSellableItemsCacheKey($sellableItemRequestTransfer);
+            $cache[$cacheKey] = $sellableItemResponseTransfer;
         }
 
         return $cache;
@@ -516,6 +641,28 @@ class SellableItemsReaderTest extends Unit
             });
 
         return $itemQuantityCalculatorMock;
+    }
+
+    /**
+     * @param bool $cacheEnabled
+     *
+     * @return \PHPUnit\Framework\MockObject\MockObject|\Spryker\Zed\AvailabilityCartConnector\AvailabilityCartConnectorConfig
+     */
+    protected function createConfigMock(bool $cacheEnabled = true): AvailabilityCartConnectorConfig
+    {
+        $configMock = $this->createMock(AvailabilityCartConnectorConfig::class);
+
+        $configMock
+            ->method('isSellableItemsCacheEnabled')
+            ->willReturn($cacheEnabled);
+
+        $configMock
+            ->method('generateSellableItemsCacheKey')
+            ->willReturnCallback(function (SellableItemRequestTransfer $request) {
+                return md5(serialize($request->toArray()));
+            });
+
+        return $configMock;
     }
 
     /**

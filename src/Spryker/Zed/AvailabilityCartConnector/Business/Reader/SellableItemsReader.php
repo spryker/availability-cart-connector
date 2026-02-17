@@ -12,6 +12,7 @@ use Generated\Shared\Transfer\ProductAvailabilityCriteriaTransfer;
 use Generated\Shared\Transfer\SellableItemRequestTransfer;
 use Generated\Shared\Transfer\SellableItemsRequestTransfer;
 use Generated\Shared\Transfer\SellableItemsResponseTransfer;
+use Spryker\Zed\AvailabilityCartConnector\AvailabilityCartConnectorConfig;
 use Spryker\Zed\AvailabilityCartConnector\Business\Calculator\ItemQuantityCalculatorInterface;
 use Spryker\Zed\AvailabilityCartConnector\Dependency\Facade\AvailabilityCartConnectorToAvailabilityInterface;
 
@@ -33,15 +34,23 @@ class SellableItemsReader implements SellableItemsReaderInterface
     protected AvailabilityCartConnectorToAvailabilityInterface $availabilityFacade;
 
     /**
+     * @var \Spryker\Zed\AvailabilityCartConnector\AvailabilityCartConnectorConfig
+     */
+    protected AvailabilityCartConnectorConfig $availabilityCartConnectorConfig;
+
+    /**
      * @param \Spryker\Zed\AvailabilityCartConnector\Business\Calculator\ItemQuantityCalculatorInterface $itemQuantityCalculator
      * @param \Spryker\Zed\AvailabilityCartConnector\Dependency\Facade\AvailabilityCartConnectorToAvailabilityInterface $availabilityFacade
+     * @param \Spryker\Zed\AvailabilityCartConnector\AvailabilityCartConnectorConfig $availabilityCartConnectorConfig
      */
     public function __construct(
         ItemQuantityCalculatorInterface $itemQuantityCalculator,
-        AvailabilityCartConnectorToAvailabilityInterface $availabilityFacade
+        AvailabilityCartConnectorToAvailabilityInterface $availabilityFacade,
+        AvailabilityCartConnectorConfig $availabilityCartConnectorConfig
     ) {
         $this->itemQuantityCalculator = $itemQuantityCalculator;
         $this->availabilityFacade = $availabilityFacade;
+        $this->availabilityCartConnectorConfig = $availabilityCartConnectorConfig;
     }
 
     public function getSellableItems(CartChangeTransfer $cartChangeTransfer, bool $skipItemsWithAmount = true): SellableItemsResponseTransfer
@@ -92,12 +101,18 @@ class SellableItemsReader implements SellableItemsReaderInterface
 
     protected function filterCachedRequests(SellableItemsRequestTransfer $sellableItemsRequestTransfer): SellableItemsRequestTransfer
     {
+        if (!$this->availabilityCartConnectorConfig->isSellableItemsCacheEnabled()) {
+            return $sellableItemsRequestTransfer;
+        }
+
         $filteredSellableItemsRequestTransfer = (new SellableItemsRequestTransfer())
             ->setStore($sellableItemsRequestTransfer->getStoreOrFail())
             ->setQuote($sellableItemsRequestTransfer->getQuoteOrFail());
 
         foreach ($sellableItemsRequestTransfer->getSellableItemRequests() as $sellableItemRequestTransfer) {
-            if (isset(static::$sellableItemsCache[$sellableItemRequestTransfer->getProductAvailabilityCriteriaOrFail()->getEntityIdentifierOrFail()])) {
+            $cacheKey = $this->availabilityCartConnectorConfig->generateSellableItemsCacheKey($sellableItemRequestTransfer);
+
+            if (isset(static::$sellableItemsCache[$cacheKey])) {
                 continue;
             }
 
@@ -111,23 +126,29 @@ class SellableItemsReader implements SellableItemsReaderInterface
         SellableItemsRequestTransfer $sellableItemsRequestTransfer,
         SellableItemsResponseTransfer $fetchedSellableItemsResponseTransfer
     ): SellableItemsResponseTransfer {
+        if (!$this->availabilityCartConnectorConfig->isSellableItemsCacheEnabled()) {
+            return $fetchedSellableItemsResponseTransfer;
+        }
+
         $mergedSellableItemsResponseTransfer = new SellableItemsResponseTransfer();
         $sellableItemResponsesIndexedByEntityIdentifier = $this->getSellableItemResponsesIndexedByEntityIdentifier(
             $fetchedSellableItemsResponseTransfer,
         );
 
         foreach ($sellableItemsRequestTransfer->getSellableItemRequests() as $sellableItemRequestTransfer) {
-            $entityIdentifier = $sellableItemRequestTransfer->getProductAvailabilityCriteriaOrFail()->getEntityIdentifierOrFail();
+            $cacheKey = $this->availabilityCartConnectorConfig->generateSellableItemsCacheKey($sellableItemRequestTransfer);
 
-            if (isset(static::$sellableItemsCache[$entityIdentifier])) {
-                $mergedSellableItemsResponseTransfer->addSellableItemResponse(static::$sellableItemsCache[$entityIdentifier]);
+            if (isset(static::$sellableItemsCache[$cacheKey])) {
+                $mergedSellableItemsResponseTransfer->addSellableItemResponse(static::$sellableItemsCache[$cacheKey]);
 
                 continue;
             }
 
+            $entityIdentifier = $sellableItemRequestTransfer->getProductAvailabilityCriteriaOrFail()->getEntityIdentifierOrFail();
+
             if (isset($sellableItemResponsesIndexedByEntityIdentifier[$entityIdentifier])) {
                 $sellableItemResponseTransfer = $sellableItemResponsesIndexedByEntityIdentifier[$entityIdentifier];
-                static::$sellableItemsCache[$entityIdentifier] = $sellableItemResponseTransfer;
+                static::$sellableItemsCache[$cacheKey] = $sellableItemResponseTransfer;
                 $mergedSellableItemsResponseTransfer->addSellableItemResponse($sellableItemResponseTransfer);
             }
         }
