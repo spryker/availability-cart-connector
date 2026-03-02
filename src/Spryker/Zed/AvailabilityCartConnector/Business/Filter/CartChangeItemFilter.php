@@ -31,11 +31,6 @@ class CartChangeItemFilter implements CartChangeItemFilterInterface
      */
     protected AvailabilityCartConnectorToMessengerFacadeInterface $messengerFacade;
 
-    /**
-     * @param \Spryker\Zed\AvailabilityCartConnector\Business\Reader\SellableItemsReaderInterface $sellableItemsReader
-     * @param \Spryker\Zed\AvailabilityCartConnector\Business\Creator\MessageCreatorInterface $messageCreator
-     * @param \Spryker\Zed\AvailabilityCartConnector\Dependency\Facade\AvailabilityCartConnectorToMessengerFacadeInterface $messengerFacade
-     */
     public function __construct(
         SellableItemsReaderInterface $sellableItemsReader,
         MessageCreatorInterface $messageCreator,
@@ -46,11 +41,6 @@ class CartChangeItemFilter implements CartChangeItemFilterInterface
         $this->messengerFacade = $messengerFacade;
     }
 
-    /**
-     * @param \Generated\Shared\Transfer\CartChangeTransfer $cartChangeTransfer
-     *
-     * @return \Generated\Shared\Transfer\CartChangeTransfer
-     */
     public function filterOutUnavailableItems(CartChangeTransfer $cartChangeTransfer): CartChangeTransfer
     {
         $sellableItemsResponseTransfer = $this->sellableItemsReader->getSellableItems($cartChangeTransfer);
@@ -88,12 +78,6 @@ class CartChangeItemFilter implements CartChangeItemFilterInterface
         return $this->removeUnavailableItems($cartChangeTransfer, $unavailableItemsEntityIdentifiers);
     }
 
-    /**
-     * @param \Generated\Shared\Transfer\SellableItemsResponseTransfer $sellableItemsResponseTransfer
-     * @param string $entityIdentifier
-     *
-     * @return \Generated\Shared\Transfer\SellableItemResponseTransfer|null
-     */
     protected function findSellableItemResponseTransfer(
         SellableItemsResponseTransfer $sellableItemsResponseTransfer,
         string $entityIdentifier

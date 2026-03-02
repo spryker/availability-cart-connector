@@ -16,24 +16,12 @@ use Spryker\DecimalObject\Decimal;
 
 interface AvailabilityCartConnectorToAvailabilityInterface
 {
-    /**
-     * @param string $sku
-     * @param \Generated\Shared\Transfer\StoreTransfer $storeTransfer
-     * @param \Generated\Shared\Transfer\ProductAvailabilityCriteriaTransfer|null $productAvailabilityCriteriaTransfer
-     *
-     * @return \Generated\Shared\Transfer\ProductConcreteAvailabilityTransfer|null
-     */
     public function findOrCreateProductConcreteAvailabilityBySkuForStore(
         string $sku,
         StoreTransfer $storeTransfer,
         ?ProductAvailabilityCriteriaTransfer $productAvailabilityCriteriaTransfer = null
     ): ?ProductConcreteAvailabilityTransfer;
 
-    /**
-     * @param \Generated\Shared\Transfer\SellableItemsRequestTransfer $sellableItemsRequestTransfer
-     *
-     * @return \Generated\Shared\Transfer\SellableItemsResponseTransfer
-     */
     public function areProductsSellableForStore(
         SellableItemsRequestTransfer $sellableItemsRequestTransfer
     ): SellableItemsResponseTransfer;

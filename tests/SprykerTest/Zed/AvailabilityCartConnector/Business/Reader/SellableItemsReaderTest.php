@@ -615,11 +615,6 @@ class SellableItemsReaderTest extends Unit
         return $sellableItemsResponseTransfer;
     }
 
-    /**
-     * @param \PHPUnit\Framework\MockObject\MockObject $availabilityFacadeMock
-     *
-     * @return void
-     */
     protected function configureAvailabilityFacadeMockToNeverBeCalled(MockObject $availabilityFacadeMock): void
     {
         $availabilityFacadeMock
@@ -665,9 +660,6 @@ class SellableItemsReaderTest extends Unit
         return $configMock;
     }
 
-    /**
-     * @return void
-     */
     protected function clearStaticCache(): void
     {
         $reflection = new ReflectionClass(SellableItemsReader::class);

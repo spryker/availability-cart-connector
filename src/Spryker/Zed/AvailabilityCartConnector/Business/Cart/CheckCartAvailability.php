@@ -42,12 +42,6 @@ class CheckCartAvailability implements CheckCartAvailabilityInterface
      */
     protected AvailabilityCartConnectorToAvailabilityInterface $availabilityFacade;
 
-    /**
-     * @param \Spryker\Zed\AvailabilityCartConnector\Business\Calculator\ItemQuantityCalculatorInterface $itemQuantityCalculator
-     * @param \Spryker\Zed\AvailabilityCartConnector\Business\Reader\SellableItemsReaderInterface $sellableItemsReader
-     * @param \Spryker\Zed\AvailabilityCartConnector\Business\Creator\MessageCreatorInterface $messageCreator
-     * @param \Spryker\Zed\AvailabilityCartConnector\Dependency\Facade\AvailabilityCartConnectorToAvailabilityInterface $availabilityFacade
-     */
     public function __construct(
         ItemQuantityCalculatorInterface $itemQuantityCalculator,
         SellableItemsReaderInterface $sellableItemsReader,
@@ -107,11 +101,6 @@ class CheckCartAvailability implements CheckCartAvailabilityInterface
         return $cartPreCheckResponseTransfer;
     }
 
-    /**
-     * @param \Generated\Shared\Transfer\CartChangeTransfer $cartChangeTransfer
-     *
-     * @return \Generated\Shared\Transfer\CartPreCheckResponseTransfer
-     */
     public function checkCartAvailabilityBatch(CartChangeTransfer $cartChangeTransfer): CartPreCheckResponseTransfer
     {
         $sellableItemsResponseTransfer = $this->sellableItemsReader->getSellableItems($cartChangeTransfer);
@@ -119,11 +108,6 @@ class CheckCartAvailability implements CheckCartAvailabilityInterface
         return $this->createCartPreCheckResponseTransfer($sellableItemsResponseTransfer);
     }
 
-    /**
-     * @param \Generated\Shared\Transfer\SellableItemsResponseTransfer $sellableItemsResponseTransfer
-     *
-     * @return \Generated\Shared\Transfer\CartPreCheckResponseTransfer
-     */
     protected function createCartPreCheckResponseTransfer(
         SellableItemsResponseTransfer $sellableItemsResponseTransfer
     ): CartPreCheckResponseTransfer {
@@ -146,11 +130,6 @@ class CheckCartAvailability implements CheckCartAvailabilityInterface
         return $cartPreCheckResponseTransfer;
     }
 
-    /**
-     * @param \Generated\Shared\Transfer\CartChangeTransfer $cartChangeTransfer
-     *
-     * @return \Generated\Shared\Transfer\StoreTransfer
-     */
     protected function getStoreTransfer(CartChangeTransfer $cartChangeTransfer): StoreTransfer
     {
         $cartChangeTransfer
@@ -160,13 +139,6 @@ class CheckCartAvailability implements CheckCartAvailabilityInterface
         return $cartChangeTransfer->getQuote()->getStore();
     }
 
-    /**
-     * @param \Generated\Shared\Transfer\ItemTransfer $itemTransfer
-     * @param \Generated\Shared\Transfer\StoreTransfer $storeTransfer
-     * @param \Generated\Shared\Transfer\ProductAvailabilityCriteriaTransfer $productAvailabilityCriteriaTransfer
-     *
-     * @return \Spryker\DecimalObject\Decimal
-     */
     protected function findProductConcreteAvailability(
         ItemTransfer $itemTransfer,
         StoreTransfer $storeTransfer,

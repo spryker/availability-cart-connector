@@ -38,11 +38,6 @@ class SellableItemsReader implements SellableItemsReaderInterface
      */
     protected AvailabilityCartConnectorConfig $availabilityCartConnectorConfig;
 
-    /**
-     * @param \Spryker\Zed\AvailabilityCartConnector\Business\Calculator\ItemQuantityCalculatorInterface $itemQuantityCalculator
-     * @param \Spryker\Zed\AvailabilityCartConnector\Dependency\Facade\AvailabilityCartConnectorToAvailabilityInterface $availabilityFacade
-     * @param \Spryker\Zed\AvailabilityCartConnector\AvailabilityCartConnectorConfig $availabilityCartConnectorConfig
-     */
     public function __construct(
         ItemQuantityCalculatorInterface $itemQuantityCalculator,
         AvailabilityCartConnectorToAvailabilityInterface $availabilityFacade,

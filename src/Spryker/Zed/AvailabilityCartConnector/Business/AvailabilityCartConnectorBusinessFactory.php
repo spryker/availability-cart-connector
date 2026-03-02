@@ -40,9 +40,6 @@ class AvailabilityCartConnectorBusinessFactory extends AbstractBusinessFactory
         );
     }
 
-    /**
-     * @return \Spryker\Zed\AvailabilityCartConnector\Business\Filter\CartChangeItemFilterInterface
-     */
     public function createCartChangeItemFilter(): CartChangeItemFilterInterface
     {
         return new CartChangeItemFilter(
@@ -52,9 +49,6 @@ class AvailabilityCartConnectorBusinessFactory extends AbstractBusinessFactory
         );
     }
 
-    /**
-     * @return \Spryker\Zed\AvailabilityCartConnector\Business\Reader\SellableItemsReaderInterface
-     */
     public function createSellableItemsReader(): SellableItemsReaderInterface
     {
         return new SellableItemsReader(
@@ -64,17 +58,11 @@ class AvailabilityCartConnectorBusinessFactory extends AbstractBusinessFactory
         );
     }
 
-    /**
-     * @return \Spryker\Zed\AvailabilityCartConnector\Business\Calculator\ItemQuantityCalculatorInterface
-     */
     public function createItemQuantityCalculator(): ItemQuantityCalculatorInterface
     {
         return new ItemQuantityCalculator($this->getCartItemQuantityCounterStrategyPlugins());
     }
 
-    /**
-     * @return \Spryker\Zed\AvailabilityCartConnector\Business\Creator\MessageCreatorInterface
-     */
     public function createMessageCreator(): MessageCreatorInterface
     {
         return new MessageCreator();
@@ -95,9 +83,6 @@ class AvailabilityCartConnectorBusinessFactory extends AbstractBusinessFactory
         return $this->getProvidedDependency(AvailabilityCartConnectorDependencyProvider::FACADE_AVAILABILITY);
     }
 
-    /**
-     * @return \Spryker\Zed\AvailabilityCartConnector\Dependency\Facade\AvailabilityCartConnectorToMessengerFacadeInterface
-     */
     public function getMessengerFacade(): AvailabilityCartConnectorToMessengerFacadeInterface
     {
         return $this->getProvidedDependency(AvailabilityCartConnectorDependencyProvider::FACADE_MESSENGER);

@@ -32,12 +32,6 @@ class MessageCreator implements MessageCreatorInterface
      */
     public const GLOSSARY_KEY_PARAMETER_SKU = '%sku%';
 
-    /**
-     * @param \Spryker\DecimalObject\Decimal $availability
-     * @param string $sku
-     *
-     * @return \Generated\Shared\Transfer\MessageTransfer
-     */
     public function createItemIsNotAvailableMessage(Decimal $availability, string $sku): MessageTransfer
     {
         if ($availability->lessThanOrEquals(0)) {
@@ -47,12 +41,6 @@ class MessageCreator implements MessageCreatorInterface
         return $this->createAvailabilityFailedMessage($availability, $sku);
     }
 
-    /**
-     * @param \Spryker\DecimalObject\Decimal $availability
-     * @param string $sku
-     *
-     * @return \Generated\Shared\Transfer\MessageTransfer
-     */
     protected function createAvailabilityFailedMessage(Decimal $availability, string $sku): MessageTransfer
     {
         return (new MessageTransfer())
@@ -63,11 +51,6 @@ class MessageCreator implements MessageCreatorInterface
             ]);
     }
 
-    /**
-     * @param string $sku
-     *
-     * @return \Generated\Shared\Transfer\MessageTransfer
-     */
     protected function createAvailabilityEmptyMessage(string $sku): MessageTransfer
     {
         return (new MessageTransfer())

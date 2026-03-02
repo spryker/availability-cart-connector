@@ -36,13 +36,6 @@ class AvailabilityCartConnectorCommunicationTester extends Actor
 {
     use _generated\AvailabilityCartConnectorCommunicationTesterActions;
 
-    /**
-     * @param \Generated\Shared\Transfer\StoreTransfer $storeTransfer
-     * @param int $availableQuantity
-     * @param bool $isNeverOutOfStock
-     *
-     * @return \Generated\Shared\Transfer\ProductConcreteTransfer
-     */
     public function createProductWithAvailabilityForStore(
         StoreTransfer $storeTransfer,
         int $availableQuantity,

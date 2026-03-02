@@ -42,9 +42,6 @@ class FilterOutUnavailableCartChangeItemsTest extends Unit
      */
     protected AvailabilityCartConnectorBusinessTester $tester;
 
-    /**
-     * @return void
-     */
     protected function setUp(): void
     {
         parent::setUp();
@@ -57,9 +54,6 @@ class FilterOutUnavailableCartChangeItemsTest extends Unit
         );
     }
 
-    /**
-     * @return void
-     */
     public function testRemovesUnavailableItems(): void
     {
         // Arrange
@@ -88,9 +82,6 @@ class FilterOutUnavailableCartChangeItemsTest extends Unit
         );
     }
 
-    /**
-     * @return void
-     */
     public function testChangesQuantityForUnavailableItem(): void
     {
         // Arrange
@@ -125,9 +116,6 @@ class FilterOutUnavailableCartChangeItemsTest extends Unit
         $this->assertSame(1, $cartChangeTransfer->getItems()->offsetGet(1)->getQuantity());
     }
 
-    /**
-     * @return void
-     */
     public function testRemovesDuplicatedUnavailableItem(): void
     {
         // Arrange
@@ -168,9 +156,6 @@ class FilterOutUnavailableCartChangeItemsTest extends Unit
         $this->assertSame(1, $cartChangeTransfer->getItems()->offsetGet(1)->getQuantity());
     }
 
-    /**
-     * @return void
-     */
     public function testThrowsRequiredTransferPropertyExceptionWhenStoreIsNotProvided(): void
     {
         // Arrange
