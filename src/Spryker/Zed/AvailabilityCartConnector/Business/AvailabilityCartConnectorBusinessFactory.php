@@ -15,6 +15,8 @@ use Spryker\Zed\AvailabilityCartConnector\Business\Creator\MessageCreator;
 use Spryker\Zed\AvailabilityCartConnector\Business\Creator\MessageCreatorInterface;
 use Spryker\Zed\AvailabilityCartConnector\Business\Expander\AvailabilityItemExpander;
 use Spryker\Zed\AvailabilityCartConnector\Business\Expander\AvailabilityItemExpanderInterface;
+use Spryker\Zed\AvailabilityCartConnector\Business\Expander\LockedQuoteItemsAvailabilityExpander;
+use Spryker\Zed\AvailabilityCartConnector\Business\Expander\LockedQuoteItemsAvailabilityExpanderInterface;
 use Spryker\Zed\AvailabilityCartConnector\Business\Filter\CartChangeItemFilter;
 use Spryker\Zed\AvailabilityCartConnector\Business\Filter\CartChangeItemFilterInterface;
 use Spryker\Zed\AvailabilityCartConnector\Business\Reader\SellableItemsReader;
@@ -72,6 +74,13 @@ class AvailabilityCartConnectorBusinessFactory extends AbstractBusinessFactory
     {
         return new AvailabilityItemExpander(
             $this->createSellableItemsReader(),
+        );
+    }
+
+    public function createLockedQuoteItemsAvailabilityExpander(): LockedQuoteItemsAvailabilityExpanderInterface
+    {
+        return new LockedQuoteItemsAvailabilityExpander(
+            $this->createAvailabilityItemExpander(),
         );
     }
 

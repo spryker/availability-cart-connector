@@ -9,6 +9,7 @@ namespace SprykerTest\Zed\AvailabilityCartConnector;
 
 use Codeception\Actor;
 use Generated\Shared\DataBuilder\CartChangeBuilder;
+use Generated\Shared\DataBuilder\QuoteBuilder;
 use Generated\Shared\Transfer\CartChangeTransfer;
 use Generated\Shared\Transfer\ItemTransfer;
 use Generated\Shared\Transfer\ProductConcreteTransfer;
@@ -82,6 +83,42 @@ class AvailabilityCartConnectorCommunicationTester extends Actor
         }
 
         return $cartChangeTransfer;
+    }
+
+    /**
+     * @param array<string> $skus
+     * @param \Generated\Shared\Transfer\StoreTransfer|null $storeTransfer
+     * @param bool $isLocked
+     *
+     * @return \Generated\Shared\Transfer\QuoteTransfer
+     */
+    public function createQuoteTransferWithItemSkus(
+        array $skus,
+        ?StoreTransfer $storeTransfer = null,
+        bool $isLocked = true
+    ): QuoteTransfer {
+        $seed = [QuoteTransfer::IS_LOCKED => $isLocked];
+
+        if ($storeTransfer !== null) {
+            $seed[QuoteTransfer::STORE] = $storeTransfer->toArray();
+        }
+
+        $quoteTransfer = (new QuoteBuilder($seed))->build();
+
+        foreach ($skus as $sku) {
+            $quoteTransfer->addItem((new ItemTransfer())->setSku($sku)->setQuantity(1));
+        }
+
+        return $quoteTransfer;
+    }
+
+    public function assertItemHasAvailabilityData(
+        ItemTransfer $itemTransfer,
+        float $expectedStockQuantity,
+        bool $expectedIsNeverOutOfStock
+    ): void {
+        $this->assertSame($expectedStockQuantity, $itemTransfer->getStockQuantity());
+        $this->assertSame($expectedIsNeverOutOfStock, $itemTransfer->getIsNeverOutOfStock());
     }
 
     /**
