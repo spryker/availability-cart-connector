@@ -143,7 +143,6 @@ class AvailabilityLockedQuoteExpandBeforeCreatePluginTest extends Unit
     {
         $reflection = new ReflectionClass(SellableItemsReader::class);
         $property = $reflection->getProperty('sellableItemsCache');
-        $property->setAccessible(true);
         $property->setValue(null, []);
     }
 }
