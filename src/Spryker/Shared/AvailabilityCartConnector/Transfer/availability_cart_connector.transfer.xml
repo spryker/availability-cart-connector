@@ -4,6 +4,7 @@
     <transfer name="Quote">
         <property name="store" type="Store"/>
         <property name="items" type="Item[]" singular="item"/>
+        <property name="isLocked" type="bool"/>
     </transfer>
 
     <transfer name="Store">
@@ -19,6 +20,8 @@
         <property name="sku" type="string"/>
         <property name="quantity" type="int"/>
         <property name="amount" type="decimal"/>
+        <property name="stockQuantity" type="float" strict="true"/>
+        <property name="isNeverOutOfStock" type="bool" strict="true"/>
     </transfer>
 
     <transfer name="CartPreCheckResponse">
@@ -67,6 +70,7 @@
         <property name="sku" type="string"/>
         <property name="productAvailabilityCriteria" type="ProductAvailabilityCriteria" strict="true"/>
         <property name="quantity" type="decimal"/>
+        <property name="isNeverOutOfStock" type="bool" strict="true"/>
     </transfer>
 
 </transfers>
